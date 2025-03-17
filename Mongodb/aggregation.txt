@@ -1,0 +1,325 @@
+1.$match(filter data):-
+
+ ->db.users.aggregate({
+    {$match:{age:{$gt:30}}}
+ })
+
+2. $group (group & aggregate the data)->
+ ->db.products.aggregate([
+    {$group:{_id:"$category"}}
+ ])
+
+ 3. $sort(Sorting)-> Asc / Desc
+
+ db.products.aggregate([
+    {$sort:{price:-1}}  // -1 for Desc(dessending) and 1 for Asc(assending)
+ ])
+
+ 4. $project(for selecting specified fields) :-
+
+->db.products.aggregate([
+    {$project:{name:1,price:1,_id:0}}
+])
+
+$lookup method(Join Between Two Collection):- (Most important is mongodb)
+
+// lets assume you have 2 Collection - users products
+
+db.users.aggregate([
+    {$lookup:{
+        from:"orders", //jis particular Collection se match krna hai
+localField:"user_id",
+foreignField:"_id",
+as:"orderDetails" Collection name jiske basis pe store krna hai
+    }}
+
+    //unwind method
+    -> iska kaam ye hai ki orderDetails ke andar jo bhi likha hoga usee pura asit's dikha dega
+])
+
+        //  1.$match(filter data):-
+        //  ->db.usersCollection.aggregate({
+        //     {$match:{age:{$gt:30}}}
+        //  })
+        
+        
+        // 2. $group (group & aggregate the data)->
+        //  ->db.ProductCollection.aggregate([
+        //     {$group:{_id:"$category"}}
+        //  ])
+        
+        
+        //  3. $sort(Sorting)-> Asc / Desc
+        //  db.ProductCollection.aggregate([
+        //     {$sort:{price:-1}}  // -1 for Desc(dessending) and 1 for Asc(assending)
+        //  ])
+        
+        
+        
+        //  4. $project(for selecting specified fields) :-
+        // ->db.ProductCollection.aggregate([
+        //     {$project:{name:1,price:1,_id:0}}
+        // ])
+        
+        
+        
+        //  5. $lookup method(Join Between Two Collection):- (Most important is mongodb)
+        // lets assume you have 2 Collection - users products
+        // db.usersCollection.aggregate([
+        //     {$lookup:{
+        //         from:"orders", //jis particular Collection se match krna hai
+        // localField:"user_id",
+        // foreignerField:"_id",
+        // as:"orderDetails" //Collection name jiske basis pe store krna hai
+        //     }}
+        //     //unwind method
+        //     -> iska kaam ye hai ki orderDetails ke andar jo bhi likha hoga usee pura vesa ka vesa dikha dega
+        // ])
+
+
+       // 6. limit method =>
+        // when we have to retun a specified number of document at that time we have to use limit ....
+
+        // const b=await userCollection.aggregate([{$limit:2}]).toArray();
+        // console.log(b)
+
+
+
+
+
+      // 7. skip method => when we have to skip some documents from starting or end at that time we have to use skip method 
+      // when we have to skip method in pagination
+        // const b=await userCollection.aggregate([{$skip:2},limit:3]).toArray();
+        // console.log(b)
+        //unwind method -> array ko open or to see inside result 
+
+
+
+
+      // 8. out method => when we have to basicly store our aggergation result in new collection at that time we have to use out mehtod 
+         // const b=await userCollection.aggregate([{$match:{age:{$gt:30}}},{$out:""budhe_log}]).toArray();
+        // console.log(b)
+     
+
+
+      // 9. AddField method => it is used when we have to add  a new entry to the collection.
+        // const b=await userCollection.aggregate([{$addFields:{isAdult:{$gte:["$age",30]}}},{$out:""budhe_log}]).toArray();
+        // console.log(b)
+     
+
+
+      // 10. facet method => when we have to run multiple pipelines at same point of time then we have to use facet mehtod .
+         //const b = await userCollection.aggregate([
+    {
+        $facet: {
+            "jawanstudents": [
+                { $match: { age: { $lt: 25 } } }
+            ],
+            "budhe_students": [
+                { $match: { age: { $gte: 30 } } }
+            ]
+        }
+    }
+]).toArray();
+
+console.log(b);
+
+
+
+
+
+      // 11. bucket method => when we have to divide students on the basis of any particular range at that time we have to use bucket method.
+      const b = await userCollection.aggergation([{$bucket:{groupBy:"$age",boundaries:[10,20,30,40,50],default:"other",output:{count:{$sum:1}}}}]).toArray()
+      console.log(b)
+
+        
+       
+
+      // 12. bucketauto method=> it will make automatic bucket ..
+       const b = await userCollection.aggergation([{$bucketauto:{groupBy:"$age",buckets:3}}]).toArray()
+      console.log(b)
+
+
+
+
+      // 13. touupperCase/tolowerCase
+      const b = await userCollection.aggergation([{$project:{nameUpper:{$toupper:"$name"}}}]).toArray()
+      console.log(b)
+      
+
+
+
+
+
+
+
+
+        //  1. const result= await userCollection.aggregate([{$match:{age:{$gt:30}}}]).toArray();
+        // console.log("Data inserted.");
+
+        // const duplicatecity = await vishal.aggregate([{$match:{city:"Delhi"}}]).toArray();
+        // console.log("Success",duplicatecity);
+   
+
+        // 2.  const result = await Products.aggregate([{$group:{_id:"$category",total:{$sum:1}}}]).toArray();
+        // console.log("Success",result);
+
+        // 3.  const result = await Products.aggregate([{$sort:{price:-1}}]).toArray();
+        // console.log(result);
+        //const result = await Products.aggregate([{$sort:{price:1}}]).toArray();
+        // console.log(result);
+
+       // 4.  const result = await Products.aggregate([{$project:{name:1,category:1,_id:0}}]).toArray();
+       // console.log(result)
+      
+       // 5.0 const result = await usersCollection.aggregate([{$lookup:{from:"Product",localField:"_id",foreignField:"user_id",as:"productdetails"}}]).toArray();
+       // console.log(result);
+       
+
+
+       // 5.1. const result = await usersCollection.aggregate([{$lookup:{from:"Product",localField:"_id",foreignField:"user_id",as:"productdetails"}}, {$unwind:"$purchasedProducts"}]).toArray();
+       // console.log(result);
+
+       
+
+         // Questions:::
+
+
+        // 1. Ek students collection banao jisme name, age, aur course fields ho. Fir ek student ka data insert karo.
+        // 2. Multiple students ka data ek sath insert karo.
+        // 3. Ek aise student ka data insert karo jisme optional field (e.g., address) ho, lekin kuch students ke pass yeh field na ho.
+        // 4. Ek unique index create karo jo ensure kare ki email duplicate na ho sake insert ke time.
+        // 5. Agar koi student pehle se exist karta ho, to uska data update karo nahi to naya document insert karo (upsert use karke).
+        // Read (Find) Operations:
+        // 6. Sirf name aur age retrieve karo students collection se.
+        // 7. Aise students ka data fetch karo jinki age 18 se zyada ho
+        // 8. Sirf un students ka naam aur course fetch karo jinke paas "MERN Stack" course hai.
+        // 9. Un students ka data fetch karo jinme "name" field missing hai.
+        // 10. Data ko descending order me sort karo based on age.
+        // Update Operations:
+        // 11. Kisi particular student ki age update karo jiska name "Rahul" hai.
+        // 12. Jitne bhi students ka course "Web Development" hai un sabka course "Full Stack Development" me update karo.
+        // 13. Kisi particular student ke document me ek naya field "grade" add karo bina purana data hataye.
+        // 14. Jis student ki age 20 se kam hai, uski fees 10% increase karo.
+        // 15. Un students ke email field ko lowercase me update karo jinme email available hai.
+        // Delete Operations:
+        // 16. Jis student ka name "Amit" hai, uska data delete karo.
+        // 17. Jitne bhi students ki age 15 se kam hai unko delete karo.
+        // 18. Jis student me course ka field missing hai, unko delete karo.
+        // 19. Saare students ko delete karo jo 5 saal pehle insert kiye gaye the.
+        // 20. Puri students collection drop karo bina database delete kiye.   
+
+
+
+
+        // Answers:::
+
+
+        // 1. const singleUser=await userCollection.insertOne({_id:1,name:"vishal",age:19});
+        // console.log("User Inserted.",singleUser);
+        // const deleteuser=await userCollection.deleteOne({_id:1});
+        // console.log(" user Deleted",deleteuser);
+        // 2. const multipleUser=await userCollection.insertMany([{_id:1,name:"don",age:18},{_id:2,name:"tanisha",age:18},{_id:3,name:"Goutam",age:21},{_id:4,name:"Deepak",age:18},{_id:5,name:"tanii",age:18},{_id:6,name:"Monty",age:19},{_id:7,name:"don",age:18},{_id:8,name:"Vishal",age:19},{_id:9,name:"Vatan",age:18},{_id:10,name:"Sunny",age:19},]);
+        // console.log("Data Inserted.",multipleUser);
+        // 3. const updateuserAddress = await userCollection.updateOne({_id:3},{$set:{adress:"Sorkhi"}});
+        // console.log("User Adress Updated Succesfully.",updateuserAddress);
+        // const multipleuserupdate = await userCollection.updateMany({ $or: [{ _id: 2 }, { _id: 4 }] },{ $set: { adress: "Hisar" } });
+        // console.log("Many User Record updated.",multipleuserupdate);
+        // const updateMany = await userCollection.updateMany({_id:{$in:[1,2,3,4,5,6,7,8,9,10]}},{$set:{email:"Montysorkhi227@gmail.com"}});
+        // console.log("updated many user records.",updateMany);
+        // const deleteuser = await userCollection.deleteMany({ _id: { $in: [1, 2, 3, 4, 5, 7, 8, 9, 10] }});
+        // console.log("Deleted", deleteuser);
+        // 4. const multipleUser= await userCollection.insertMany([{_id:15,name:"Vishal",age:19,email:"VishalRana@gmail.com"},{_id:16,name:"ishrar",age:19,email:"Ishrar@gmail.com"},{_id:17,name:"Goutam",age:19,email:"Goutam@gmail.com"},])
+        // console.log("user Inserted.",multipleUser);
+        // const uniqueuser = await userCollection.createIndex({email:1},{unique:true});
+        // console.log("unique User Inserted.",uniqueuser);
+        // 5. const userupdate = await userCollection.updateOne({ name: ' Rahul' }, { $set: { age: 20, grade: 'A' } }, { upsert: true });
+        // console.log(" Succesfull.",userupdate);
+        // 6. const user=await userCollection.find().project({_id:0,name:1,age:1}).toArray()
+        // console.log(" Succesfull.",user);
+        // 7.  const userdata=await userCollection.find({age:{$gt:18}}).toArray()
+        // console.log(" Succesfull.",userdata);
+        // 8. const students = await userCollection.find({ course: 'MERN Stack' }, { name: 1, course: 1 });
+        // console.log(" Succesfull.",students);
+        // 9. const studentsWithoutName = await userCollection.find({ name: { $exists: false } });
+        // console.log(" Succesfull.",studentsWithoutName);
+        // 10. const sortedStudents = await userCollection.find().sort({ age: -1 });
+        // console.log(" Succesfull.",sortedStudents);
+        // 11.  const updateStudents = await userCollection.updateOne({ name: 'Rahul' }, { $set: { age: 12 } });
+        // console.log(" Succesfull.",updateStudents);
+        // 12. const updateStudents = await userCollection.updateMany({ course: 'Web Development' }, { $set: { course: 'Full Stack Development' } });
+        // console.log(" Succesfull.",updateStudents);
+        // 13. const updateStudents = await userCollection.updateOne({ name: 'Rahul' }, { $set: { grade: 'A' } });
+        // console.log(" Succesfull.",updateStudents); b
+        // 14. const updateStudents = await userCollection.updateMany({ age: { $lt: 20 } }, { $inc: { fees: (10 / 100) * fees } });
+        // console.log(" Succesfull.",updateStudents);
+        // 15. const updateStudents = await userCollection.updateMany({ email: { $exists: true } }, [{ $set: { email: { $toLower: "$email" } } }]);
+        // console.log(" Succesfull.",updateStudents);
+        // 16. const deleteStudent = await userCollection.deleteOne({ name: 'Rahul' });
+        // console.log(" Succesfull.",deleteStudent);
+        // 17. const deleteuser = await userCollection.deleteMany({ age: { $lt: 15 } });
+        // console.log(" Succesfull.",deleteuser);
+        // 18. const deleteusers = await userCollection.deleteMany({ course: { $exists: false } });
+        // console.log(" Succesfull.",deleteusers);
+        // 19. const deleteusers =  await userCollection.deleteMany({ createdAt: { $lt: new Date(new Date() - 5 * 365 * 24 * 60 * 60 * 1000) } });
+        // console.log(" Succesfull.",deleteusers);
+        // 20.  const deleteusers = await userCollection.drop();
+        // console.log(" Succesfull.",deleteusers);
+
+
+
+       // Questions:::
+
+
+
+        // 1. Ek students collection banao jisme name, age, aur course fields ho. Fir ek student ka data
+        // insert karo.
+        // 2. Multiple students ka data ek sath insert karo.
+        // 3. Ek aise student ka data insert karo jisme optional field (e.g., address) ho, lekin kuch students
+        // ke pass yeh field na ho.
+        // 4. Ek unique index create karo jo ensure kare ki email duplicate na ho sake insert ke time.
+        // 5. Agar koi student pehle se exist karta ho, to uska data update karo nahi to naya document
+        // insert karo (upsert use karke).
+        // Read (Find) Operations:
+        // 6. Sirf name aur age retrieve karo students collection se.
+        // 7. Aise students ka data fetch karo jinki age 18 se zyada ho
+        // 8. Sirf un students ka naam aur course fetch karo jinke paas "MERN Stack" course hai.
+        // 9. Un students ka data fetch karo jinme "name" field missing hai.
+        // 10. Data ko descending order me sort karo based on age.
+        // Update Operations:
+        // 11. Kisi particular student ki age update karo jiska name "Rahul" hai.
+        // 12. Jitne bhi students ka course "Web Development" hai un sabka course "Full Stack
+        // Development" me update karo.
+        // 13. Kisi particular student ke document me ek naya field "grade" add karo bina purana data
+        // hataye.
+        // 14. Jis student ki age 20 se kam hai, uski fees 10% increase karo.
+        // 15. Un students ke email field ko lowercase me update karo jinme email available hai.
+        // Delete Operations:
+        // 16. Jis student ka name "Amit" hai, uska data delete karo.
+        // 17. Jitne bhi students ki age 15 se kam hai unko delete karo.
+        // 18. Jis student me course ka field missing hai, unko delete karo.
+        // 19. Saare students ko delete karo jo 5 saal pehle insert kiye gaye the.
+        // 20. Puri students collection drop karo bina database delete kiye.
+
+        
+
+        // Answers:::
+        // 1. const insertstudnt = await userCollection.insertOne({ name: "Rahul", age: 20, course: "Computer Science" });
+        // 2. const insertstdnts = await  userCollection.insertMany([{ name: "Vishal", age: 19, course: "Computer Science" }, { name: "Aditi", age: 20, course: "Mathematics" }, { name: "Rahul", age: 21, course: "Physics" }]);
+        // 3. const insertstdnts = await  userCollection.insertMany([
+        //     { name: "Vishal", age: 19, course: "Computer Science", address: "123 Main St" },
+        //     { name: "Aditi", age: 20, course: "Mathematics" }, // address field missing
+        //     { name: "Rahul", age: 21, course: "Physics", address: "456 Elm St" },
+        //     { name: "Sneha", age: 22, course: "Chemistry" } // address field missing
+        // ]);
+        // 4.  const insertstdntswithuniqemail = await  userCollection.createIndex({ email: 1 }, { unique: true });
+        // 5. 
+        }
+        catch(error){
+        console.error("Error:", error);
+        }
+        finally {
+        await client.close();
+        }
+}
+main();
